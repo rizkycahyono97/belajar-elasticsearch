@@ -1,0 +1,223 @@
+@baseUrl = https://localhost:9200
+
+### create index customers
+PUT {{baseUrl}}/customers
+
+### create index products
+PUT {{baseUrl}}/products
+
+### create index orders
+PUT {{baseUrl}}/orders
+
+### show all indices
+GET {{baseUrl}}/_cat/indices?v
+
+### delete index customers
+DELETE {{baseUrl}}/customers
+
+### delete index products
+DELETE {{baseUrl}}/products
+
+### delete index orders
+DELETE {{baseUrl}}/orders
+
+### show all indices
+GET {{baseUrl}}/_cat/indices?v
+
+### get customers mapping
+GET {{baseUrl}}/customers/_mapping
+
+### update customers mapping
+PUT {{baseUrl}}/customers/_mapping
+Content-Type: application/json
+
+{
+  "date_detection" : true,
+  "dynamic_date_formats" : [
+    "yyyy-MM-dd HH:mm:ss",
+    "yyyy-MM-dd",
+    "yyyy/MM/dd HH:mm:ss",
+    "yyyy/MM/dd"
+  ]
+}
+
+### update customers mapping
+PUT {{baseUrl}}/customers/_mapping
+Content-Type: application/json
+
+{
+  "numeric_detection": true
+}
+
+### get products mapping
+GET {{baseUrl}}/products/_mapping
+
+### update products mapping
+PUT {{baseUrl}}/products/_mapping
+Content-Type: application/json
+
+{
+  "date_detection" : true,
+  "dynamic_date_formats" : [
+    "yyyy-MM-dd HH:mm:ss",
+    "yyyy-MM-dd",
+    "yyyy/MM/dd HH:mm:ss",
+    "yyyy/MM/dd"
+  ]
+}
+
+### update products mapping
+PUT {{baseUrl}}/products/_mapping
+Content-Type: application/json
+
+{
+  "numeric_detection" : true
+}
+
+### get orders mapping
+GET {{baseUrl}}/orders/_mapping
+
+### update orders mapping
+PUT {{baseUrl}}/orders/_mapping
+Content-Type: application/json
+
+{
+  "date_detection" : true,
+  "dynamic_date_formats" : [
+    "yyyy-MM-dd HH:mm:ss",
+    "yyyy-MM-dd",
+    "yyyy/MM/dd HH:mm:ss",
+    "yyyy/MM/dd"
+  ]
+}
+
+### update orders mapping
+PUT {{baseUrl}}/orders/_mapping
+Content-Type: application/json
+
+{
+  "numeric_detection" : true
+}
+
+
+### create new customer
+POST {{baseUrl}}/customers/_create/khannedy
+Content-Type: application/json
+
+{
+  "name" : "Eko Kurniawan Khannedy",
+  "register_at" : "2023-10-10 00:00:00"
+}
+
+### get customers mapping
+GET {{baseUrl}}/customers/_mapping
+
+### create product 1
+POST {{baseUrl}}/products/_create/1
+Content-Type: application/json
+
+{
+  "name" : "Indomie Ayam Bawang",
+  "price" : "2000"
+}
+
+### create product 2
+POST {{baseUrl}}/products/_create/2
+Content-Type: application/json
+
+{
+  "name" : "Mie Sedap Soto",
+  "price" : 2000
+}
+
+### get products mapping
+GET {{baseUrl}}/products/_mapping
+
+### create order 1
+POST {{baseUrl}}/orders/_create/1
+Content-Type: application/json
+
+{
+  "order_date": "2023-09-09 00:00:00",
+  "customer_id": "khannedy",
+  "total": "8000",
+  "items": [
+    {
+      "product_id": "1",
+      "price": "2000",
+      "quantity": "2"
+    },
+    {
+      "product_id": "2",
+      "price": "2000",
+      "quantity": "2"
+    }
+  ]
+}
+
+### get orders mapping
+GET {{baseUrl}}/orders/_mapping
+
+### get customer khannedy
+GET {{baseUrl}}/customers/_doc/khannedy
+
+### get customer notfound
+GET {{baseUrl}}/customers/_doc/salah
+
+### get customer khannedy
+GET {{baseUrl}}/customers/_source/khannedy
+
+### get customer notfound
+GET {{baseUrl}}/customers/_source/salah
+
+### check customer khannedy
+HEAD {{baseUrl}}/customers/_doc/khannedy
+
+### check customer notfound
+HEAD {{baseUrl}}/customers/_doc/salah
+
+### get products 1 and 2
+GET {{baseUrl}}/products/_mget
+Content-Type: application/json
+
+{
+  "ids" : [
+    "1", "2"
+  ]
+}
+
+### get order 1 and customer khannedy
+GET {{baseUrl}}/_mget
+Content-Type: application/json
+
+{
+  "docs": [
+    {
+      "_id" : "1",
+      "_index": "orders"
+    },
+    {
+      "_id" : "khannedy",
+      "_index": "customers"
+    },
+    {
+      "_id" : "3",
+      "_index": "products"
+    }
+  ]
+}
+
+### search all products
+POST {{baseUrl}}/products/_search
+
+### search all products page 1
+POST {{baseUrl}}/products/_search?size=1&from=0
+
+### search all products page 2
+POST {{baseUrl}}/products/_search?size=1&from=1
+
+### search all products sort by price
+POST {{baseUrl}}/products/_search?sort=price:asc
+
+### search all products sort by name
+POST {{baseUrl}}/products/_search?sort=name:desc
