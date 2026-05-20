@@ -1,4 +1,8 @@
-@baseUrl = https://localhost:9200
+@baseUrl = http://localhost:9200
+
+####################################
+############ INDEX #################
+####################################
 
 ### create index customers
 PUT {{baseUrl}}/customers
@@ -23,6 +27,11 @@ DELETE {{baseUrl}}/orders
 
 ### show all indices
 GET {{baseUrl}}/_cat/indices?v
+
+
+####################################
+######## Dynamic Mapping ###########
+####################################
 
 ### get customers mapping
 GET {{baseUrl}}/customers/_mapping
@@ -100,6 +109,10 @@ Content-Type: application/json
 }
 
 
+####################################
+########### Create API #############
+####################################
+
 ### create new customer
 POST {{baseUrl}}/customers/_create/khannedy
 Content-Type: application/json
@@ -158,6 +171,11 @@ Content-Type: application/json
 ### get orders mapping
 GET {{baseUrl}}/orders/_mapping
 
+
+####################################
+######### Get API ##################
+####################################
+
 ### get customer khannedy
 GET {{baseUrl}}/customers/_doc/khannedy
 
@@ -175,6 +193,11 @@ HEAD {{baseUrl}}/customers/_doc/khannedy
 
 ### check customer notfound
 HEAD {{baseUrl}}/customers/_doc/salah
+
+
+####################################
+####### Multi Get API ##############
+####################################
 
 ### get products 1 and 2
 GET {{baseUrl}}/products/_mget
@@ -207,6 +230,11 @@ Content-Type: application/json
   ]
 }
 
+
+####################################
+######### Search API ###############
+####################################
+
 ### search all products
 POST {{baseUrl}}/products/_search
 
@@ -221,3 +249,70 @@ POST {{baseUrl}}/products/_search?sort=price:asc
 
 ### search all products sort by name
 POST {{baseUrl}}/products/_search?sort=name:desc
+
+
+####################################
+######## Index API #################
+####################################
+
+### create product 3
+POST {{baseUrl}}/products/_doc/3
+Content-Type: application/json
+
+{
+    "name": "Pop Mie Rasa Bakso",
+    "price": 2500
+}
+
+### create product 4
+POST {{baseUrl}}/products/_doc/4
+Content-Type: application/json
+
+{
+    "name": "Sarimi isi 2",
+    "price": 3000
+}
+
+### create product 5
+POST {{baseUrl}}/products/_doc/5
+Content-Type: application/json
+
+{
+    "name": "Mie Ayam",
+    "price": 10000
+}
+
+### search all products
+POST {{baseUrl}}/products/_search
+
+
+####################################
+############ Update API ############
+####################################
+
+### update price for product 5
+POST {{baseUrl}}/products/_update/5
+Content-Type: application/json
+
+{
+    "doc": {
+        "price": 20000
+    }
+}
+
+
+####################################
+############ Delete API ############
+####################################
+
+### insert customer spammer
+POST {{baseUrl}}/customers/_create/spammer
+Content-Type: application/json
+
+{
+    "name": "spammer",
+    "register_at": "2024-03-04 00:00:00"
+}
+
+### delete customer spammer
+DELETE {{baseUrl}}/customers/_doc/spammer
