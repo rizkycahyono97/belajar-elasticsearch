@@ -316,3 +316,226 @@ Content-Type: application/json
 
 ### delete customer spammer
 DELETE {{baseUrl}}/customers/_doc/spammer
+
+
+####################################
+############ Bulk API ##############
+####################################
+
+### search index
+GET {{baseUrl}}/customers/_search
+
+#### BUlk API
+POST {{baseUrl}}/_bulk
+Content-Type: application/x-ndjson
+
+{"create" : {"_index" : "customers", "_id" : "Joko"}}
+{"name" : "Jokowi Doodo", "register_at" : "2030-05-03 00:00:00"}
+{"index" : {"_index" : "customers", "_id" : "budi"}}
+{"name" : "Budi Nugraha", "register_at" : "2030-05-06 00:00:00"}
+{"update" : {"_index" : "products", "_id" : "1"}}
+{"doc" : {"price" : 4000}}
+{"create" :  {"_index" : "customers", "_id" : "spammer"}}
+{"name" : "Spammer", "register_at" : "2020-02-06 00:00:00"}
+{"delete" : {"_index" : "customers", "_id" : "spammer"}}
+
+###
+#
+
+####################################
+########### Alias API ##############
+####################################
+
+### create alias customer and order
+POST {{baseUrl}}/_aliases
+Content-Type: application/json
+
+{
+  "actions" : [
+    {
+      "add" : {
+        "alias" : "customer",
+        "index" : "customers"
+      }
+    },
+    {
+      "add" : {
+        "alias" : "order",
+        "index" : "orders"
+      }
+    }
+  ]
+}
+
+### get aliases
+GET {{baseUrl}}/_aliases
+
+### search index
+GET {{baseUrl}}/customer/_search
+
+### search index
+GET {{baseUrl}}/order/_search
+
+
+####################################
+######### Reindex API ##############
+####################################
+
+### Create Index orders_v2
+PUT {{baseUrl}}/orders_v2
+
+### Mapping index orders_v2
+PUT {{baseUrl}}/orders_v2/_mapping
+Content-Type: application/json
+
+{
+  "date_detection" : true,
+  "dynamic_date_formats" : [
+    "yyyy-MM-dd HH:mm:ss",
+    "yyyy-MM-dd",
+    "yyyy/MM/dd HH:mm:ss",
+    "yyyy/MM/dd"
+  ]
+}
+
+### rindex index order to orders_v2
+POST {{baseUrl}}/_reindex
+Content-Type: application/json
+
+{
+  "source" : {
+    "index" : "orders"
+  },
+  "dest" : {
+    "index" : "orders_v2"
+  }
+}
+
+### search index orders_v2
+GET {{baseUrl}}/orders_v2/_search
+
+### search index orders
+GET {{baseUrl}}/orders/_search
+
+### switch alias order from orders to orders_V2
+POST {{baseUrl}}/_aliases
+Content-Type: application/json
+
+{
+  "actions" : [
+    {
+      "remove": {
+        "alias" : "order",
+        "index" : "orders"
+      }
+    },
+    {
+      "add" : {
+        "alias" : "order",
+        "index" : "orders_v2"
+      }
+    }
+  ]
+}
+
+### GET orders_v2 aliases
+GET {{baseUrl}}/_aliases
+
+### Search to order_v2 aliases
+GET {{baseUrl}}/order/_search
+
+
+####################################
+############# Source  ##############
+####################################
+
+### seperti select total, customer_id, items, product from orders
+GET {{baseUrl}}/order/_search?_source_includes=total,costomer_id,items.product_id
+
+### select * except price from products
+GET {{baseUrl}}/order/_search?_source_excludes=price
+
+### select total,customer_id,items,products from orders where id = 1
+GET {{baseUrl}}/order/_doc/1?_source_includes=total,customer_id,items.product_id
+
+
+####################################
+############# Mapping ##############
+####################################
+
+### create index customers_v2
+PUT {{baseUrl}}/customers_v2
+Content-Type: application/json
+
+
+### update mapping customer_v2
+PUT {{baseUrl}}/customers_v2/_mapping
+Content-Type: application/json
+
+{
+  "numeric_detection": true,
+  "date_detection" : true,
+  "dynamic_date_formats" : [
+    "yyyy-MM-dd HH:mm:ss",
+    "yyyy-MM-dd",
+    "yyyy/MM/dd HH:mm:ss",
+    "yyyy/MM/dd"
+  ],
+  "properties": {
+      "username": {
+        "type": "keyword"
+      },
+      "first_name": {
+        "type": "text"
+      },
+      "last_name": {
+        "type": "text"
+      },
+      "email": {
+        "type": "keyword"
+      },
+      "gender": {
+        "type": "keyword"
+      },
+      "birth_date": {
+        "type": "date",
+        "format": "yyyy-MM-dd"
+      }
+  }
+}
+
+### get customers_v2
+GET {{baseUrl}}/customers_v2
+
+### switch alias customer from customers to customers_v2
+POST {{baseUrl}}/_aliases
+Content-Type: application/json
+
+{
+  "actions": [
+    {
+      "remove": {
+        "alias": "customer",
+        "index": "customers"
+      }
+    },
+    {
+      "add" : {
+        "alias" : "customer",
+        "index" : "customers_v2"
+      }
+    }
+  ]
+}
+
+### get aliases customers_v2
+GET {{baseUrl}}/_aliases
+
+### search csutomer
+GET {{baseUrl}}/customer/_search
+
+### bulk insert customer
+POST {{baseUrl}}/_bulk
+Content-Type: application/json
+
+< customers.json
