@@ -539,3 +539,117 @@ POST {{baseUrl}}/_bulk
 Content-Type: application/json
 
 < customers.json
+
+
+####################################
+############ Object Field ##########
+####################################
+
+### update customers_v2 mapping
+PUT {{baseUrl}}/customers_v2/_mapping
+Content-Type: application/json
+
+{
+  "properties": {
+    "address": {
+      "properties": {
+        "street": {
+          "type": "text"
+        },
+        "city": {
+          "type": "text"
+        },
+        "province": {
+          "type": "text"
+        },
+        "country": {
+          "type": "text"
+        },
+        "zip_code": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
+
+### update mapping customer_v2
+GET {{baseUrl}}/customers_v2/_mapping
+
+### INSERT customer
+POST {{baseUrl}}/_bulk
+Content-Type: application/json
+
+< customers-with-address.json
+
+
+####################################
+############ Array Field ###########
+####################################
+
+### update customers_v2 mapping
+PUT {{baseUrl}}/customers_v2/_mapping
+Content-Type: application/json
+
+{
+  "properties": {
+    "hobbies": {
+      "type": "text"
+    },
+    "banks": {
+      "properties": {
+        "name": {
+          "type": "text"
+        },
+        "account_number": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
+
+### get customers_v2 mapping
+GET {{baseUrl}}/customers_v2/_mapping
+
+### bulk index customers_v2
+POST {{baseUrl}}/_bulk
+Content-Type: application/json
+
+< customers-with-hobbies-and-banks.json
+
+### search customer
+POST {{baseUrl}}/customer/_search
+
+####################################
+############ Query #################
+####################################
+
+### search customer using match_all
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+### search customer using pagination
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  },
+  "size": 5,
+  "from": 0,
+  "sort": [
+    {
+      "username": {
+        "order": "desc"
+      }
+    }
+  ]
+}
