@@ -653,3 +653,316 @@ Content-Type: application/json
     }
   ]
 }
+
+
+####################################
+############ Term Query ############
+####################################
+
+### search customer where gender = 'Female'
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "term": {
+      "gender": "Female"
+    }
+  },
+  "size": 5,
+  "from": 0,
+  "sort": [
+    {
+      "username": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+### search customer where gender = 'BCA' # kosong karena tipedatanya text
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "term": {
+      "banks.name": "BCA"
+    }
+  },
+  "size": 5,
+  "from": 0,
+  "sort": [
+    {
+      "username": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+####################################
+############ Match Query ###########
+####################################
+
+### search customer where banks.name = 'BCA
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match": {
+      "banks.name": "BCA"
+    }
+  },
+  "size": 5,
+  "from": 0,
+  "sort": [
+    {
+      "username": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+### banks.name = "BCA" => banks.name = ["bca"]
+### banks.name = "BCA Digital" => banks.name = ["bca", "digital"]
+### email = "RIZKY@mail.com" => email = ["rizky", "mail", "com"]
+
+### search customer where banks.name = 'BCA DIGITAL'
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match": {
+      "banks.name": {
+        "query" : "BCA DIGITAL",
+        "operator": "AND"
+      }
+    }
+  },
+  "size": 5,
+  "from": 0,
+  "sort": [
+    {
+      "username": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+
+####################################
+########### Terms Query ############
+####################################
+
+### search customer where username IN = ('username1', 'username2', 'username3')
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "terms": {
+      "username": [
+        "username1",
+        "username2",
+        "username3"
+      ]
+    }
+  }
+}
+
+### search customer where banks.name IN = ('BCA', 'BNI', 'BTN')
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "terms": {
+      "banks.name": [
+        "bca",
+        "btn",
+        "bni"
+      ]
+    }
+  }
+}
+
+
+####################################
+######### Boolean Query ############
+####################################
+
+### MUST => search customer where hobbies = 'gaming' AND banks.name = 'bca'
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "hobbies": "gaming"
+          }
+        },
+        {
+          "match": {
+            "banks.name": {
+              "query": "bca digital",
+              "operator": "AND"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+### FILTER => search customer where hobbies = 'gaming' AND banks.name = 'bca' (tanpa score)
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "hobbies": "gaming"
+          }
+        },
+        {
+          "match": {
+            "banks.name": {
+              "query": "bca digital",
+              "operator": "AND"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "username": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+### MUST NOT => search customer where hobbies != 'gaming' AND banks.name != 'bca'
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "term": {
+            "hobbies": "gaming"
+          }
+        },
+        {
+          "match": {
+            "banks.name": {
+              "query": "bca digital",
+              "operator": "AND"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+### SHOULD => search customer where hobbies = 'bni' OR banks.name = 'bca'
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "term": {
+            "banks.name": "bni"
+          }
+        },
+        {
+          "term": {
+            "banks.name": "bca"
+          }
+        }
+      ]
+    }
+  }
+}
+
+### MUST & SHOULD => kalau begini, minimum shouldnya jadi tidak wajib
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "size": 10,
+  "from": 315,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "hobbies": "gaming"
+          }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "banks.name": "bni"
+          }
+        },
+        {
+          "term": {
+            "banks.name": "bca"
+          }
+        }
+      ]
+    }
+  }
+}
+
+### MUST & SHOULD with minimum SHOULD
+POST {{baseUrl}}/customer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "hobbies": "gaming"
+          }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "banks.name": "bni"
+          }
+        },
+        {
+          "term": {
+            "banks.name": "bca"
+          }
+        }
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
